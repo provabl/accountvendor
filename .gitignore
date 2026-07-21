@@ -1,8 +1,8 @@
-/vendor
+# Note: do NOT ignore "vendor/" here — this module is *named* vendor and its CLI
+# lives in cmd/vendor/. A bare "vendor/" pattern would ignore that source. The
+# built binary is bin/vendor, covered by bin/ below.
 /dist/
 *.test
 *.out
-vendor/
 .DS_Store
-.vendor/
 bin/
