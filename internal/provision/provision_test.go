@@ -16,7 +16,7 @@ import (
 
 // fakeProv records what it did and can fail any step.
 type fakeProv struct {
-	created, adopted            string // account ids returned
+	created                     string // account id returned by Create
 	createErr, adoptErr, tagErr error
 	didCreate, didAdopt         bool
 	taggedID                    string
