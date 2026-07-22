@@ -53,9 +53,13 @@ See `business/vendor-product-spec.md` (in the umbrella) and provabl epic #9 for 
 ## Install
 
 ```bash
-go install github.com/provabl/vendor/cmd/vendor@latest   # requires Go 1.26.5+
+go install github.com/provabl/accountvendor/cmd/vendor@latest   # requires Go 1.26.5+; installs the `vendor` binary
 # or build from a clone: go build ./cmd/vendor
 ```
+
+> **Module vs. command name.** The Go module is `github.com/provabl/accountvendor` (a module path
+> can't end in `/vendor` — Go reserves `vendor` as a directory name), but the binary and CLI command
+> are simply `vendor`.
 
 ## License
 

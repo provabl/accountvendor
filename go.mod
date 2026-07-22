@@ -1,4 +1,4 @@
-module github.com/provabl/vendor
+module github.com/provabl/accountvendor
 
 go 1.26.5
 

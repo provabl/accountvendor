@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ### Added
 
+- **`internal/provision` — the vend orchestration (seams, no AWS yet)**: `Orchestrator.Vend` resolves
+  the SRE type from the catalog, places the account (via a `Provisioner` seam — **`Adopt`** an existing
+  account *or* `Create` a new one), applies the type's tags, runs the `attest compile` pre-flight (via
+  a `Compiler` seam), and produces the account meta. Fail-closed ordering: an unknown type, a missing
+  target OU, a placement failure, or a compile failure each stop *before* a manifest is emitted —
+  vendor never declares an account ready if its policy didn't compile. Built **adopt-first**: `Adopt`
+  (reversible) and `Create` (irreversible) share the same post-placement path, so the whole pipeline
+  is validated via adopt before live `CreateAccount` is exercised. Fully fake-tested (create / adopt /
+  unknown-type / no-OU / parent-override / missing-name-email / compile-fail-no-meta /
+  placement-fail-stops).
+- **`internal/meta` — the manifest boundary**: reads ground's `ground-meta.json` **leniently** (only
+  the fields vendor needs — region, SSO ARN — tolerating ground's richer, evolving struct so a new
+  ground field can't break vendor) and writes the per-account `<account-id>-meta.json` that
+  `attest init` consumes (schema-versioned; account id, region, OU, SRE type + frameworks, tags, SSO,
+  provenance). Honest to ground's *actual* contract: vendor does **not** assume ground-meta carries OU
+  ids (it doesn't) — placement comes from `--parent`. Fully unit-tested (round-trips + unknown-field
+  tolerance + validation).
+
 - **Initial repo scaffold** — `vendor`, the Provabl suite's AWS account vendor (infrastructure layer,
   **sibling to ground** — ground deploys the org once, vendor vends accounts into it on demand). Go
   1.26.5, Apache-2.0 / Playground Logic LLC, cobra CLI root, Makefile, CI (Check + Lint) + weekly

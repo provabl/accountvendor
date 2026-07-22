@@ -1,8 +1,11 @@
-# Note: do NOT ignore "vendor/" here — this module is *named* vendor and its CLI
-# lives in cmd/vendor/. A bare "vendor/" pattern would ignore that source. The
-# built binary is bin/vendor, covered by bin/ below.
+# Note: do NOT use a bare "vendor/" pattern — it would match cmd/vendor/ (this
+# module's CLI source) at any depth and ignore it. `/vendor` below is anchored to
+# the repo root, so it ignores only a stray root-level `vendor` binary (from
+# `go build ./cmd/vendor`), not the cmd/vendor/ source. The Makefile builds to
+# bin/vendor, covered by bin/.
 /dist/
 *.test
 *.out
 .DS_Store
 bin/
+/vendor
