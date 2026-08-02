@@ -56,6 +56,9 @@ claims — attest does that, after a scan.`,
 		SilenceErrors: true,
 	}
 	cmd.AddCommand(catalogCmd())
-	// Further subcommands land in their own PRs: meta, provision, adopt, preflight, log.
+	cmd.AddCommand(preflightCmd())
+	cmd.AddCommand(adoptCmd())
+	cmd.AddCommand(provisionCmd())
+	// Further subcommands land in their own PRs: meta, log.
 	return cmd
 }
