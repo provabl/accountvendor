@@ -48,10 +48,11 @@ func catalogListCmd() *cobra.Command {
 				return err
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
-			fmt.Fprintln(w, "KEY\tNAME\tFRAMEWORKS\tOU")
+			// Writes to a tabwriter are buffered; Flush reports any error.
+			_, _ = fmt.Fprintln(w, "KEY\tNAME\tFRAMEWORKS\tOU")
 			for _, key := range c.Keys() {
 				t, _ := c.Get(key)
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", t.Key, t.Name, join(t.Frameworks), dash(t.OU))
+				_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", t.Key, t.Name, join(t.Frameworks), dash(t.OU))
 			}
 			return w.Flush()
 		},

@@ -47,8 +47,49 @@ Shipped so far:
 - **`vendor catalog list` / `show`** — inspect the SRE-type catalog (frameworks, OU, tags, baseline
   stacks per type). The catalog schema is shared with attest (attest#98) via
   [`github.com/provabl/schemas`](https://github.com/provabl/schemas) — one schema, not two.
+- **`vendor preflight`** — check that the calling principal holds the AWS Organizations actions a
+  vend needs, via read-only `iam:SimulatePrincipalPolicy`. Run it **before** `provision`. See
+  [`docs/required-permissions.md`](docs/required-permissions.md).
+- **`vendor adopt <account-id> --type <key>`** — retrofit an **existing** account to an SRE type:
+  place it in the type's OU, apply its tags, run the `attest compile` pre-flight, write
+  `<account-id>-meta.json`. **Reversible and idempotent** — the recommended way to validate the
+  whole pipeline before `provision`, and the way to bring a hand-created account under management.
+- **`vendor provision --type <key> --name … --email …`** — vend a **new** account (same pipeline,
+  `organizations:CreateAccount` instead of adopt). **Irreversible.** Use `--dry-run` first.
+
+Not yet wired: the CloudFormation baseline stacks (`internal/baseline`) and `vendor log`. The live
+account operations are implemented and fake-tested end to end, but **not yet exercised against a
+real org** — validate with `preflight` → `--dry-run` → `adopt` before `provision`.
 
 See `business/vendor-product-spec.md` (in the umbrella) and provabl epic #9 for the full roadmap.
+
+## Usage
+
+```bash
+# 0. Can this principal even do it? (read-only; requires the org MANAGEMENT account)
+vendor preflight --region us-east-1
+
+# 1. What can we vend?
+vendor catalog list --catalog catalog.json
+vendor catalog show nih-genomics --catalog catalog.json
+
+# 2. Resolve the type + OU and print the plan — touches nothing
+vendor provision --type nih-genomics --name chen-genomics \
+  --email aws-chen@uni.edu --ground-meta ground-meta.json --dry-run
+
+# 3. Validate the whole pipeline against an EXISTING account (reversible)
+vendor adopt 123456789012 --type nih-genomics --ground-meta ground-meta.json
+
+# 4. Only then, vend for real (IRREVERSIBLE)
+vendor provision --type nih-genomics --name chen-genomics \
+  --email aws-chen@uni.edu --ground-meta ground-meta.json
+
+# → writes <account-id>-meta.json for: attest init --ground-meta <account-id>-meta.json
+```
+
+`--ground-meta` supplies the region/SSO context from ground; `--region` alone works without it.
+The target OU comes from the SRE type and is resolved **by name** (ground names its OUs and
+`ground-meta.json` carries no OU ids); `--parent` overrides it with a name or an `ou-…` id.
 
 ## Install
 
